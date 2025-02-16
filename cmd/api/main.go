@@ -14,6 +14,10 @@ func main() {
 
 	config := baseconfig.NewConfig()
 
+	if err := config.LoadConfig(); err != nil {
+		log.Fatalf("environment variable is not loaded : %v", err)
+	}
+
 	storage := basestorage.NewStorage(config)
 
 	if err := storage.Connect(); err != nil {

@@ -2,27 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
 
-	baseconfig "github.com/ladmakhi81/learning-management-system/internal/base/config"
-	basestorage "github.com/ladmakhi81/learning-management-system/internal/base/storage"
-	"github.com/spf13/viper"
+	basebootstrap "github.com/ladmakhi81/learning-management-system/internal/base/bootstrap"
 )
 
 func main() {
-	viper.AutomaticEnv()
-
-	config := baseconfig.NewConfig()
-
-	if err := config.LoadConfig(); err != nil {
-		log.Fatalf("environment variable is not loaded : %v", err)
-	}
-
-	storage := basestorage.NewStorage(config)
-
-	if err := storage.Connect(); err != nil {
-		log.Fatalf("database not connected : %v", err)
-	}
-
+	bootstrap := basebootstrap.NewBootstrap()
+	bootstrap.Apply()
 	fmt.Println("main function invoked")
 }

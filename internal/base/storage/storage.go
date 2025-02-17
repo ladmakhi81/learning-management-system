@@ -32,11 +32,11 @@ func (s *Storage) Connect() error {
 }
 
 func (s Storage) getConnectionString() string {
-	dbHost := s.config.DatabaseConfig.Host
-	dbUser := s.config.DatabaseConfig.UserName
-	dbPassword := s.config.DatabaseConfig.Password
-	dbName := s.config.DatabaseConfig.Name
-	dbPort := s.config.DatabaseConfig.Port
+	dbHost := s.config.DatabaseConfig.DBHost
+	dbUser := s.config.DatabaseConfig.DBUserName
+	dbPassword := s.config.DatabaseConfig.DBPassword
+	dbName := s.config.DatabaseConfig.DBName
+	dbPort := s.config.DatabaseConfig.DBPort
 
 	return fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",

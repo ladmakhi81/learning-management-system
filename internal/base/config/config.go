@@ -7,14 +7,19 @@ import (
 
 type Config struct {
 	*DatabaseConfig
+	*ServerConfig
+}
+
+type ServerConfig struct {
+	ServerPort uint
 }
 
 type DatabaseConfig struct {
-	Name     string
-	Password string
-	UserName string
-	Port     uint
-	Host     string
+	DBName     string
+	DBPassword string
+	DBUserName string
+	DBPort     uint
+	DBHost     string
 }
 
 func NewConfig() *Config {
@@ -31,13 +36,19 @@ func (c *Config) setupConfig() error {
 	return nil
 }
 
+func (c *Config) loadServerConfig() {
+	c.ServerConfig = &ServerConfig{
+		ServerPort: viper.GetUint("APP_PORT"),
+	}
+}
+
 func (c *Config) loadDatabaseConfig() {
 	c.DatabaseConfig = &DatabaseConfig{
-		Name:     viper.GetString("DB_NAME"),
-		Password: viper.GetString("DB_PASSWORD"),
-		UserName: viper.GetString("DB_USER"),
-		Port:     viper.GetUint("DB_PORT"),
-		Host:     viper.GetString("DB_HOST"),
+		DBName:     viper.GetString("DB_NAME"),
+		DBPassword: viper.GetString("DB_PASSWORD"),
+		DBUserName: viper.GetString("DB_USER"),
+		DBPort:     viper.GetUint("DB_PORT"),
+		DBHost:     viper.GetString("DB_HOST"),
 	}
 }
 
@@ -48,6 +59,7 @@ func (c *Config) LoadConfig() error {
 	}
 
 	c.loadDatabaseConfig()
+	c.loadServerConfig()
 
 	return nil
 }

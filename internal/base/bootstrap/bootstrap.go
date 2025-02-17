@@ -1,7 +1,7 @@
 package basebootstrap
 
 import (
-	"log"
+	"fmt"
 
 	baseconfig "github.com/ladmakhi81/learning-management-system/internal/base/config"
 	basestorage "github.com/ladmakhi81/learning-management-system/internal/base/storage"
@@ -9,25 +9,28 @@ import (
 	"go.uber.org/dig"
 )
 
-type Bootstrap struct{}
+type Bootstrap struct {
+	container *dig.Container
+	config    *baseconfig.Config
+}
 
 func NewBootstrap() Bootstrap {
 	return Bootstrap{}
 }
 
-func (b Bootstrap) Apply() {
+func (b *Bootstrap) Apply() error {
 	viper.AutomaticEnv()
 	container := dig.New()
 	config := baseconfig.NewConfig()
 
 	if err := config.LoadConfig(); err != nil {
-		log.Fatalf("environment variable is not loaded : %v", err)
+		return fmt.Errorf("environment variable is not loaded : %v", err)
 	}
 
 	storage := basestorage.NewStorage(config)
 
 	if err := storage.Connect(); err != nil {
-		log.Fatalf("database not connected : %v", err)
+		return fmt.Errorf("database not connected : %v", err)
 	}
 
 	container.Provide(func() *baseconfig.Config {
@@ -37,4 +40,16 @@ func (b Bootstrap) Apply() {
 	container.Provide(func() *basestorage.Storage {
 		return storage
 	})
+
+	b.container = container
+	b.config = config
+	return nil
+}
+
+func (b Bootstrap) GetContainer() *dig.Container {
+	return b.container
+}
+
+func (b Bootstrap) GetConfig() *baseconfig.Config {
+	return b.config
 }

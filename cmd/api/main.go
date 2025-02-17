@@ -15,20 +15,21 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	container := bootstrap.GetContainer()
-	config := bootstrap.GetConfig()
-	port := config.ServerConfig.ServerPort
-
 	server := gin.Default()
 	apiServer := server.Group("/api")
 
+	container := bootstrap.GetContainer()
 	container.Provide(func() *gin.RouterGroup {
 		return apiServer
 	})
+
+	config := bootstrap.GetConfig()
+	port := config.ServerConfig.ServerPort
+
+	bootstrap.LoadModules()
 
 	fmt.Printf("the server running at port %d \n", port)
 
 	log.Fatalln(server.Run(fmt.Sprintf(":%d", port)))
 
-	fmt.Println("main function invoked")
 }

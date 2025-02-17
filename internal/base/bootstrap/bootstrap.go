@@ -5,6 +5,7 @@ import (
 
 	baseconfig "github.com/ladmakhi81/learning-management-system/internal/base/config"
 	basestorage "github.com/ladmakhi81/learning-management-system/internal/base/storage"
+	"github.com/ladmakhi81/learning-management-system/internal/role"
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
 )
@@ -43,6 +44,7 @@ func (b *Bootstrap) Apply() error {
 
 	b.container = container
 	b.config = config
+
 	return nil
 }
 
@@ -52,4 +54,9 @@ func (b Bootstrap) GetContainer() *dig.Container {
 
 func (b Bootstrap) GetConfig() *baseconfig.Config {
 	return b.config
+}
+
+func (b Bootstrap) LoadModules() {
+	roleModule := role.NewRoleModule(b.container)
+	roleModule.LoadModule()
 }

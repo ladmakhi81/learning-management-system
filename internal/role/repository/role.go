@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
 	basestorage "github.com/ladmakhi81/learning-management-system/internal/base/storage"
 	roleentity "github.com/ladmakhi81/learning-management-system/internal/role/entity"
 	"gorm.io/gorm"
@@ -25,7 +26,7 @@ func (r RoleRepositoryImpl) CreateRole(role *roleentity.Role) error {
 	result := r.storage.DB.Create(role)
 	fmt.Println(result.Error, result.RowsAffected)
 	if result.Error != nil || result.RowsAffected == 0 {
-		return errors.New("Database Can't Create Role With Provided Information")
+		return baseerror.NewServerErr(result.Error, "RoleRepositoryImpl.CreateRole")
 	}
 	return nil
 }

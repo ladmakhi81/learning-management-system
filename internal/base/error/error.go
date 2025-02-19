@@ -17,6 +17,18 @@ type ServerErr struct {
 	Location string `json:"location"`
 }
 
+func (e ClientErr) Error() string {
+	return e.Message
+}
+
+func (e ClientValidationErr) Error() string {
+	return e.Message
+}
+
+func (e ServerErr) Error() string {
+	return e.Message
+}
+
 func NewClientErr(message string, statusCode uint) ClientErr {
 	return ClientErr{
 		Message:    message,

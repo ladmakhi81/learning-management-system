@@ -1,8 +1,8 @@
 package rolerepository
 
 import (
-	"errors"
 	"fmt"
+	"net/http"
 
 	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
 	basestorage "github.com/ladmakhi81/learning-management-system/internal/base/storage"
@@ -26,7 +26,7 @@ func (r RoleRepositoryImpl) CreateRole(role *roleentity.Role) error {
 	result := r.storage.DB.Create(role)
 	fmt.Println(result.Error, result.RowsAffected)
 	if result.Error != nil || result.RowsAffected == 0 {
-		return baseerror.NewServerErr(result.Error, "RoleRepositoryImpl.CreateRole")
+		return baseerror.NewServerErr(result.Error.Error(), "RoleRepositoryImpl.CreateRole")
 	}
 	return nil
 }
@@ -34,7 +34,7 @@ func (r RoleRepositoryImpl) CreateRole(role *roleentity.Role) error {
 func (r RoleRepositoryImpl) DeleteRoleById(id uint) error {
 	result := r.storage.DB.Delete(&roleentity.Role{}, id)
 	if result.Error != nil || result.RowsAffected == 0 {
-		return errors.New("Database Can't Delete Role By ID")
+		return baseerror.NewServerErr(result.Error.Error(), "RoleRepositoryImpl.DeleteRoleById")
 	}
 	return nil
 }
@@ -43,10 +43,10 @@ func (r RoleRepositoryImpl) FindRoleById(id uint) (*roleentity.Role, error) {
 	role := new(roleentity.Role)
 	result := r.storage.DB.First(&role, id)
 	if result.Error != nil {
-		return nil, errors.New("Database Can't Return The Role With Provided ID")
+		return nil, baseerror.NewServerErr(result.Error.Error(), "RoleRepositoryImpl.FindRoleById")
 	}
 	if role == nil {
-		return nil, errors.New("Role Not Found With This Provided ID")
+		return nil, baseerror.NewClientErr("Role Not Found With This Provided ID", http.StatusNotFound)
 	}
 	return role, nil
 }
@@ -58,7 +58,7 @@ func (r RoleRepositoryImpl) FindRoleByName(name string) (*roleentity.Role, error
 		if result.Error == gorm.ErrRecordNotFound {
 			return nil, nil
 		}
-		return nil, errors.New("Database Can't Return The Role With Provided Name")
+		return nil, baseerror.NewServerErr(result.Error.Error(), "RoleRepositoryImpl.FindRoleByName")
 	}
 	return role, nil
 }
@@ -67,7 +67,7 @@ func (r RoleRepositoryImpl) GetRoles(page, limit int) ([]roleentity.Role, error)
 	roles := make([]roleentity.Role, 0)
 	result := r.storage.DB.Unscoped().Offset(page).Limit(limit).Find(&roles)
 	if result.Error != nil {
-		return nil, errors.New("Database Can't Find All Roles")
+		return nil, baseerror.NewServerErr(result.Error.Error(), "RoleRepositoryImpl.GetRoles")
 	}
 	return roles, nil
 }

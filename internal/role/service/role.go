@@ -1,8 +1,9 @@
 package roleservice
 
 import (
-	"errors"
+	"net/http"
 
+	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
 	rolecontractor "github.com/ladmakhi81/learning-management-system/internal/role/contractor"
 	rolerequestdto "github.com/ladmakhi81/learning-management-system/internal/role/dto/request"
 	roleentity "github.com/ladmakhi81/learning-management-system/internal/role/entity"
@@ -26,7 +27,7 @@ func (svc RoleServiceImpl) CreateRole(dto *rolerequestdto.CreateRoleReqDTO) (*ro
 		return nil, duplicatedNameErr
 	}
 	if duplicatedName != nil {
-		return nil, errors.New("Role Exist With This Name")
+		return nil, baseerror.NewClientErr("Role Name Already Exist", http.StatusConflict)
 	}
 	// TODO: replace createdById with real one from token
 	createdById := uint(1)

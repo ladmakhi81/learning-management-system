@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS "_roles" (
     "created_by_id" INT,
     "lock" BOOLEAN DEFAULT false,
     "permissions" TEXT [],
-    "name" VARCHAR(255) UNIQUE NOT NULL
+    "name" VARCHAR(255) NOT NULL
 )

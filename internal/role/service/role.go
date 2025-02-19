@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
+	roleconstant "github.com/ladmakhi81/learning-management-system/internal/role/constant"
 	rolecontractor "github.com/ladmakhi81/learning-management-system/internal/role/contractor"
 	rolerequestdto "github.com/ladmakhi81/learning-management-system/internal/role/dto/request"
 	roleentity "github.com/ladmakhi81/learning-management-system/internal/role/entity"
@@ -27,7 +28,7 @@ func (svc RoleServiceImpl) CreateRole(dto *rolerequestdto.CreateRoleReqDTO) (*ro
 		return nil, duplicatedNameErr
 	}
 	if duplicatedName != nil {
-		return nil, baseerror.NewClientErr("Role Name Already Exist", http.StatusConflict)
+		return nil, baseerror.NewClientErr(roleconstant.DUPLICATE_ROLE_NAME, http.StatusConflict)
 	}
 	// TODO: replace createdById with real one from token
 	createdById := uint(1)
@@ -55,6 +56,12 @@ func (svc RoleServiceImpl) FindRoleById(id uint) (*roleentity.Role, error) {
 	role, roleErr := svc.roleRepo.FindRoleById(id)
 	if roleErr != nil {
 		return nil, roleErr
+	}
+	if role == nil {
+		return nil, baseerror.NewClientErr(
+			roleconstant.NOT_FOUND_ID,
+			http.StatusNotFound,
+		)
 	}
 	return role, nil
 }

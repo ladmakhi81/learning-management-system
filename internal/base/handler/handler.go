@@ -2,6 +2,7 @@ package basehandler
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -39,10 +40,12 @@ func BaseHandler(handler Handler) gin.HandlerFunc {
 			// server error
 			serverErr, serverErrOk := err.(baseerror.ServerErr)
 			if serverErrOk {
+				// TODO: write event-emitter to send error with generated id to log error in file and also return this id into client
+				serverErrID := rand.Intn(1000000000)
 				fmt.Println(serverErr)
 				ctx.JSON(
 					http.StatusInternalServerError,
-					gin.H{"message": "internal server error"},
+					gin.H{"message": "internal server error", "trackID": serverErrID},
 				)
 				return
 			}

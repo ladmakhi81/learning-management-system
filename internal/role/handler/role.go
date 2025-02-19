@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
+	roleconstant "github.com/ladmakhi81/learning-management-system/internal/role/constant"
 	rolecontractor "github.com/ladmakhi81/learning-management-system/internal/role/contractor"
 	rolerequestdto "github.com/ladmakhi81/learning-management-system/internal/role/dto/request"
 	rolemapper "github.com/ladmakhi81/learning-management-system/internal/role/mapper"
@@ -29,7 +30,7 @@ func NewRoleHandler(
 func (h RoleHandler) CreateRole(ctx *gin.Context) error {
 	dto := rolerequestdto.NewCreateRoleReqDTO()
 	if err := ctx.Bind(dto); err != nil {
-		return baseerror.NewClientErr("Invalid Request Body", http.StatusBadRequest)
+		return baseerror.NewClientErr(roleconstant.INVALID_REQUEST_BODY, http.StatusBadRequest)
 	}
 	role, roleErr := h.roleSvc.CreateRole(dto)
 	if roleErr != nil {
@@ -64,7 +65,7 @@ func (h RoleHandler) DeleteRoleById(ctx *gin.Context) error {
 	roleIdParam := ctx.Param("id")
 	roleId, roleIdErr := strconv.Atoi(roleIdParam)
 	if roleIdErr != nil {
-		return baseerror.NewClientErr("Invalid Role ID", http.StatusBadRequest)
+		return baseerror.NewClientErr(roleconstant.INVALID_ROLE_ID, http.StatusBadRequest)
 	}
 	if err := h.roleSvc.DeleteRoleById(uint(roleId)); err != nil {
 		return err

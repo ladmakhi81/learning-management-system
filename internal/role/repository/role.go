@@ -1,9 +1,6 @@
 package rolerepository
 
 import (
-	"fmt"
-	"net/http"
-
 	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
 	basestorage "github.com/ladmakhi81/learning-management-system/internal/base/storage"
 	roleentity "github.com/ladmakhi81/learning-management-system/internal/role/entity"
@@ -24,7 +21,6 @@ func NewRoleRepositoryImpl(
 
 func (r RoleRepositoryImpl) CreateRole(role *roleentity.Role) error {
 	result := r.storage.DB.Create(role)
-	fmt.Println(result.Error, result.RowsAffected)
 	if result.Error != nil || result.RowsAffected == 0 {
 		return baseerror.NewServerErr(result.Error.Error(), "RoleRepositoryImpl.CreateRole")
 	}
@@ -43,10 +39,10 @@ func (r RoleRepositoryImpl) FindRoleById(id uint) (*roleentity.Role, error) {
 	role := new(roleentity.Role)
 	result := r.storage.DB.First(&role, id)
 	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
 		return nil, baseerror.NewServerErr(result.Error.Error(), "RoleRepositoryImpl.FindRoleById")
-	}
-	if role == nil {
-		return nil, baseerror.NewClientErr("Role Not Found With This Provided ID", http.StatusNotFound)
 	}
 	return role, nil
 }

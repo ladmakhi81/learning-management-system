@@ -12,3 +12,16 @@ type Role struct {
 
 	gorm.Model
 }
+
+func NewRole(
+	name string,
+	createdById *uint,
+	permissions []Permission,
+) *Role {
+	return &Role{
+		Name:        name,
+		CreatedByID: createdById,
+		Lock:        false,
+		Permissions: permissions,
+	}
+}

@@ -20,13 +20,6 @@ func NewRoleRepositoryImpl(
 }
 
 func (r RoleRepositoryImpl) CreateRole(role *roleentity.Role) error {
-	duplicatedName, duplicatedNameErr := r.FindRoleByName(role.Name)
-	if duplicatedNameErr != nil {
-		return duplicatedNameErr
-	}
-	if duplicatedName != nil {
-		return errors.New("Role Exist With This Name")
-	}
 	result := r.DB.Create(role)
 	if result.Error != nil || result.RowsAffected == 0 {
 		return errors.New("Database Can't Create Role With Provided Information")
@@ -35,11 +28,7 @@ func (r RoleRepositoryImpl) CreateRole(role *roleentity.Role) error {
 }
 
 func (r RoleRepositoryImpl) DeleteRoleById(id uint) error {
-	role, roleErr := r.FindRoleById(id)
-	if roleErr != nil {
-		return roleErr
-	}
-	result := r.DB.Delete(&roleentity.Role{}, role.ID)
+	result := r.DB.Delete(&roleentity.Role{}, id)
 	if result.Error != nil || result.RowsAffected == 0 {
 		return errors.New("Database Can't Delete Role By ID")
 	}

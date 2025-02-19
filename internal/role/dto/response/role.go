@@ -15,3 +15,7 @@ type RoleResDTO struct {
 	Lock        bool                   `json:"lock"`
 	Permissions roleentity.Permissions `json:"permissions"`
 }
+
+func NewRoleResDTO() RoleResDTO {
+	return RoleResDTO{}
+}

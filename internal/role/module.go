@@ -6,6 +6,7 @@ import (
 	basestorage "github.com/ladmakhi81/learning-management-system/internal/base/storage"
 	rolecontractor "github.com/ladmakhi81/learning-management-system/internal/role/contractor"
 	rolehandler "github.com/ladmakhi81/learning-management-system/internal/role/handler"
+	rolemapper "github.com/ladmakhi81/learning-management-system/internal/role/mapper"
 	rolerepository "github.com/ladmakhi81/learning-management-system/internal/role/repository"
 	rolerouter "github.com/ladmakhi81/learning-management-system/internal/role/router"
 	roleservice "github.com/ladmakhi81/learning-management-system/internal/role/service"
@@ -32,6 +33,7 @@ func (m RoleModule) LoadModule() {
 func (m RoleModule) registerDependencies() {
 	m.container.Provide(rolerouter.NewRoleRouter)
 	m.container.Provide(rolehandler.NewRoleHandler)
+	m.container.Provide(rolemapper.NewRoleMapper)
 	m.container.Provide(func(storage *basestorage.Storage) rolecontractor.RoleRepository {
 		return rolerepository.NewRoleRepositoryImpl(storage)
 	})

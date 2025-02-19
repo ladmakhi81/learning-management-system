@@ -81,7 +81,17 @@ func (p *Permissions) Scan(value interface{}) error {
 	switch v := value.(type) {
 	case string:
 		permissions := make(Permissions, 0)
-		for _, item := range strings.Split(v, ",") {
+		transformedPermissions := strings.ReplaceAll(
+			strings.ReplaceAll(
+				v,
+				"{",
+				"",
+			),
+			"}",
+			"",
+		)
+
+		for _, item := range strings.Split(transformedPermissions, ",") {
 			permissions = append(permissions, Permission(item))
 		}
 		*p = permissions

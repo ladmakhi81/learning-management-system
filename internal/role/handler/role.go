@@ -7,17 +7,21 @@ import (
 	"github.com/gin-gonic/gin"
 	rolecontractor "github.com/ladmakhi81/learning-management-system/internal/role/contractor"
 	rolerequestdto "github.com/ladmakhi81/learning-management-system/internal/role/dto/request"
+	rolemapper "github.com/ladmakhi81/learning-management-system/internal/role/mapper"
 )
 
 type RoleHandler struct {
-	roleSvc rolecontractor.RoleService
+	roleSvc    rolecontractor.RoleService
+	roleMapper rolemapper.RoleMapper
 }
 
 func NewRoleHandler(
 	roleSvc rolecontractor.RoleService,
+	roleMapper rolemapper.RoleMapper,
 ) RoleHandler {
 	return RoleHandler{
-		roleSvc: roleSvc,
+		roleSvc:    roleSvc,
+		roleMapper: roleMapper,
 	}
 }
 
@@ -32,7 +36,8 @@ func (h RoleHandler) CreateRole(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": roleErr.Error()})
 		return
 	}
-	ctx.JSON(http.StatusCreated, gin.H{"data": role})
+	res := h.roleMapper.MapRoleToRoleResponseDTO(role)
+	ctx.JSON(http.StatusCreated, gin.H{"data": res})
 }
 
 func (h RoleHandler) GetRoles(ctx *gin.Context) {
@@ -51,7 +56,8 @@ func (h RoleHandler) GetRoles(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": rolesErr})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"data": roles})
+	res := h.roleMapper.MapRolesToRolesResponseDTO(roles)
+	ctx.JSON(http.StatusOK, gin.H{"data": res})
 }
 
 func (h RoleHandler) DeleteRoleById(ctx *gin.Context) {

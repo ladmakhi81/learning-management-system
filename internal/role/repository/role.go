@@ -65,7 +65,7 @@ func (r RoleRepositoryImpl) FindRoleByName(name string) (*roleentity.Role, error
 
 func (r RoleRepositoryImpl) GetRoles(page, limit int) ([]roleentity.Role, error) {
 	roles := make([]roleentity.Role, 0)
-	result := r.storage.DB.Unscoped().Offset(page).Limit(limit).Find(&roles)
+	result := r.storage.DB.Unscoped().Offset(page).Limit(limit).Order("created_at desc").Find(&roles)
 	if result.Error != nil {
 		return nil, baseerror.NewServerErr(result.Error.Error(), "RoleRepositoryImpl.GetRoles")
 	}

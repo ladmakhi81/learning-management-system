@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
 	rolecontractor "github.com/ladmakhi81/learning-management-system/internal/role/contractor"
 	rolerequestdto "github.com/ladmakhi81/learning-management-system/internal/role/dto/request"
 	rolemapper "github.com/ladmakhi81/learning-management-system/internal/role/mapper"
@@ -25,22 +26,21 @@ func NewRoleHandler(
 	}
 }
 
-func (h RoleHandler) CreateRole(ctx *gin.Context) {
+func (h RoleHandler) CreateRole(ctx *gin.Context) error {
 	dto := rolerequestdto.NewCreateRoleReqDTO()
 	if err := ctx.Bind(dto); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Request Body"})
-		return
+		return baseerror.NewClientErr("Invalid Request Body", http.StatusBadRequest)
 	}
 	role, roleErr := h.roleSvc.CreateRole(dto)
 	if roleErr != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": roleErr.Error()})
-		return
+		return roleErr
 	}
 	res := h.roleMapper.MapRoleToRoleResponseDTO(role)
 	ctx.JSON(http.StatusCreated, gin.H{"data": res})
+	return nil
 }
 
-func (h RoleHandler) GetRoles(ctx *gin.Context) {
+func (h RoleHandler) GetRoles(ctx *gin.Context) error {
 	pageParam := ctx.Query("page")
 	limitParam := ctx.Query("limit")
 	page, pageErr := strconv.Atoi(pageParam)
@@ -53,23 +53,22 @@ func (h RoleHandler) GetRoles(ctx *gin.Context) {
 	}
 	roles, rolesErr := h.roleSvc.GetRoles(page, limit)
 	if rolesErr != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": rolesErr})
-		return
+		return rolesErr
 	}
 	res := h.roleMapper.MapRolesToRolesResponseDTO(roles)
 	ctx.JSON(http.StatusOK, gin.H{"data": res})
+	return nil
 }
 
-func (h RoleHandler) DeleteRoleById(ctx *gin.Context) {
+func (h RoleHandler) DeleteRoleById(ctx *gin.Context) error {
 	roleIdParam := ctx.Param("id")
 	roleId, roleIdErr := strconv.Atoi(roleIdParam)
 	if roleIdErr != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Invalid Role Id"})
-		return
+		return baseerror.NewClientErr("Invalid Role ID", http.StatusBadRequest)
 	}
 	if err := h.roleSvc.DeleteRoleById(uint(roleId)); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": err})
-		return
+		return err
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "Delete Successfully"})
+	return nil
 }

@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
+	basetype "github.com/ladmakhi81/learning-management-system/internal/base/type"
+	baseutil "github.com/ladmakhi81/learning-management-system/internal/base/util"
 	roleconstant "github.com/ladmakhi81/learning-management-system/internal/role/constant"
 	rolecontractor "github.com/ladmakhi81/learning-management-system/internal/role/contractor"
 	rolerequestdto "github.com/ladmakhi81/learning-management-system/internal/role/dto/request"
@@ -42,6 +44,7 @@ func (svc RoleServiceImpl) CreateRole(dto *rolerequestdto.CreateRoleReqDTO) (*ro
 	}
 	return role, nil
 }
+
 func (svc RoleServiceImpl) DeleteRoleById(id uint) error {
 	role, roleErr := svc.roleRepo.FindRoleById(id)
 	if roleErr != nil {
@@ -52,6 +55,7 @@ func (svc RoleServiceImpl) DeleteRoleById(id uint) error {
 	}
 	return nil
 }
+
 func (svc RoleServiceImpl) FindRoleById(id uint) (*roleentity.Role, error) {
 	role, roleErr := svc.roleRepo.FindRoleById(id)
 	if roleErr != nil {
@@ -65,6 +69,7 @@ func (svc RoleServiceImpl) FindRoleById(id uint) (*roleentity.Role, error) {
 	}
 	return role, nil
 }
+
 func (svc RoleServiceImpl) FindRoleByName(name string) (*roleentity.Role, error) {
 	role, roleErr := svc.roleRepo.FindRoleByName(name)
 	if roleErr != nil {
@@ -72,10 +77,23 @@ func (svc RoleServiceImpl) FindRoleByName(name string) (*roleentity.Role, error)
 	}
 	return role, nil
 }
+
 func (svc RoleServiceImpl) GetRoles(page, limit int) ([]roleentity.Role, error) {
 	roles, rolesErr := svc.roleRepo.GetRoles(page, limit)
 	if rolesErr != nil {
 		return nil, rolesErr
 	}
 	return roles, nil
+}
+
+func (svc RoleServiceImpl) GetRolesPaginationMetadata(currentPage uint, limit uint) (*basetype.PaginationMetadata, error) {
+	totalCount, totalCountErr := svc.roleRepo.GetRolesCount()
+	if totalCountErr != nil {
+		return nil, totalCountErr
+	}
+	return basetype.NewPaginationMetadata(
+		currentPage,
+		baseutil.CalculateTotalPage(totalCount, limit),
+		totalCount,
+	), nil
 }

@@ -6,9 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
+	basehandler "github.com/ladmakhi81/learning-management-system/internal/base/handler"
 	roleconstant "github.com/ladmakhi81/learning-management-system/internal/role/constant"
 	rolecontractor "github.com/ladmakhi81/learning-management-system/internal/role/contractor"
 	rolerequestdto "github.com/ladmakhi81/learning-management-system/internal/role/dto/request"
+	roleresponsedto "github.com/ladmakhi81/learning-management-system/internal/role/dto/response"
 	rolemapper "github.com/ladmakhi81/learning-management-system/internal/role/mapper"
 )
 
@@ -27,21 +29,22 @@ func NewRoleHandler(
 	}
 }
 
-func (h RoleHandler) CreateRole(ctx *gin.Context) error {
+func (h RoleHandler) CreateRole(ctx *gin.Context) (*basehandler.Response, error) {
 	dto := rolerequestdto.NewCreateRoleReqDTO()
 	if err := ctx.Bind(dto); err != nil {
-		return baseerror.NewClientErr(roleconstant.INVALID_REQUEST_BODY, http.StatusBadRequest)
+		return nil, baseerror.NewClientErr(roleconstant.INVALID_REQUEST_BODY, http.StatusBadRequest)
 	}
 	role, roleErr := h.roleSvc.CreateRole(dto)
 	if roleErr != nil {
-		return roleErr
+		return nil, roleErr
 	}
-	res := h.roleMapper.MapRoleToRoleResponseDTO(role)
-	ctx.JSON(http.StatusCreated, gin.H{"data": res})
-	return nil
+
+	mappedRole := h.roleMapper.MapRoleToRoleResponseDTO(role)
+	res := roleresponsedto.NewCreateRoleRes(mappedRole)
+	return basehandler.NewResponse(res, http.StatusCreated), nil
 }
 
-func (h RoleHandler) GetRoles(ctx *gin.Context) error {
+func (h RoleHandler) GetRoles(ctx *gin.Context) (*basehandler.Response, error) {
 	pageParam := ctx.Query("page")
 	limitParam := ctx.Query("limit")
 	page, pageErr := strconv.Atoi(pageParam)
@@ -54,22 +57,26 @@ func (h RoleHandler) GetRoles(ctx *gin.Context) error {
 	}
 	roles, rolesErr := h.roleSvc.GetRoles(page, limit)
 	if rolesErr != nil {
-		return rolesErr
+		return nil, rolesErr
 	}
-	res := h.roleMapper.MapRolesToRolesResponseDTO(roles)
-	ctx.JSON(http.StatusOK, gin.H{"data": res})
-	return nil
+	mappedRoles := h.roleMapper.MapRolesToRolesResponseDTO(roles)
+	pagination, paginationErr := h.roleSvc.GetRolesPaginationMetadata(uint(page), uint(limit))
+	if paginationErr != nil {
+		return nil, paginationErr
+	}
+	res := roleresponsedto.NewGetRolesRes(mappedRoles, *pagination)
+	return basehandler.NewResponse(res, http.StatusOK), nil
 }
 
-func (h RoleHandler) DeleteRoleById(ctx *gin.Context) error {
+func (h RoleHandler) DeleteRoleById(ctx *gin.Context) (*basehandler.Response, error) {
 	roleIdParam := ctx.Param("id")
 	roleId, roleIdErr := strconv.Atoi(roleIdParam)
 	if roleIdErr != nil {
-		return baseerror.NewClientErr(roleconstant.INVALID_ROLE_ID, http.StatusBadRequest)
+		return nil, baseerror.NewClientErr(roleconstant.INVALID_ROLE_ID, http.StatusBadRequest)
 	}
 	if err := h.roleSvc.DeleteRoleById(uint(roleId)); err != nil {
-		return err
+		return nil, err
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Delete Successfully"})
-	return nil
+	res := roleresponsedto.NewDeleteRoleRes("Delete Role Successfully")
+	return basehandler.NewResponse(res, http.StatusOK), nil
 }

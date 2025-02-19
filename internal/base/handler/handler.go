@@ -9,11 +9,23 @@ import (
 	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
 )
 
-type Handler func(handler *gin.Context) error
+type Handler func(handler *gin.Context) (*Response, error)
+
+type Response struct {
+	Data       any  `json:"data"`
+	StatusCode uint `json:"statusCode"`
+}
+
+func NewResponse(data any, statusCode uint) *Response {
+	return &Response{
+		Data:       data,
+		StatusCode: statusCode,
+	}
+}
 
 func BaseHandler(handler Handler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		err := handler(ctx)
+		res, err := handler(ctx)
 		if err != nil {
 			// client error
 			clientErr, clientErrOk := err.(baseerror.ClientErr)
@@ -49,7 +61,9 @@ func BaseHandler(handler Handler) gin.HandlerFunc {
 				)
 				return
 			}
-
 		}
+
+		// success response
+		ctx.JSON(int(res.StatusCode), res)
 	}
 }

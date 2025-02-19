@@ -10,4 +10,5 @@ type RoleRepository interface {
 	FindRoleById(id uint) (*roleentity.Role, error)
 	FindRoleByName(name string) (*roleentity.Role, error)
 	GetRoles(page, limit int) ([]roleentity.Role, error)
+	GetRolesCount() (uint, error)
 }

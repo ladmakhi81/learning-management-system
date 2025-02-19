@@ -61,9 +61,18 @@ func (r RoleRepositoryImpl) FindRoleByName(name string) (*roleentity.Role, error
 
 func (r RoleRepositoryImpl) GetRoles(page, limit int) ([]roleentity.Role, error) {
 	roles := make([]roleentity.Role, 0)
-	result := r.storage.DB.Unscoped().Offset(page).Limit(limit).Order("created_at desc").Find(&roles)
+	result := r.storage.DB.Unscoped().Offset(page * limit).Limit(limit).Order("created_at desc").Find(&roles)
 	if result.Error != nil {
 		return nil, baseerror.NewServerErr(result.Error.Error(), "RoleRepositoryImpl.GetRoles")
 	}
 	return roles, nil
+}
+
+func (r RoleRepositoryImpl) GetRolesCount() (uint, error) {
+	var count int64
+	result := r.storage.DB.Model(&roleentity.Role{}).Unscoped().Count(&count)
+	if result.Error != nil {
+		return 0, baseerror.NewServerErr(result.Error.Error(), "RoleRepositoryImpl.GetRolesCount")
+	}
+	return uint(count), nil
 }

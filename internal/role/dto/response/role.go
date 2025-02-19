@@ -7,11 +7,11 @@ import (
 )
 
 type RoleResDTO struct {
-	ID          uint                    `json:"id"`
-	CreatedAt   *time.Time              `json:"createdAt"`
-	UpdatedAt   *time.Time              `json:"updatedAt"`
-	Name        string                  `json:"name"`
-	CreatedByID *uint                   `json:"createdById"`
-	Lock        bool                    `json:"lock"`
-	Permissions []roleentity.Permission `json:"permissions"`
+	ID          uint                   `json:"id"`
+	CreatedAt   *time.Time             `json:"createdAt"`
+	UpdatedAt   *time.Time             `json:"updatedAt"`
+	Name        string                 `json:"name"`
+	CreatedByID *uint                  `json:"createdById"`
+	Lock        bool                   `json:"lock"`
+	Permissions roleentity.Permissions `json:"permissions"`
 }

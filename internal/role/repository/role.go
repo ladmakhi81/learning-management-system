@@ -2,25 +2,28 @@ package rolerepository
 
 import (
 	"errors"
+	"fmt"
 
+	basestorage "github.com/ladmakhi81/learning-management-system/internal/base/storage"
 	roleentity "github.com/ladmakhi81/learning-management-system/internal/role/entity"
 	"gorm.io/gorm"
 )
 
 type RoleRepositoryImpl struct {
-	DB *gorm.DB
+	storage *basestorage.Storage
 }
 
 func NewRoleRepositoryImpl(
-	DB *gorm.DB,
+	storage *basestorage.Storage,
 ) RoleRepositoryImpl {
 	return RoleRepositoryImpl{
-		DB: DB,
+		storage: storage,
 	}
 }
 
 func (r RoleRepositoryImpl) CreateRole(role *roleentity.Role) error {
-	result := r.DB.Create(role)
+	result := r.storage.DB.Create(role)
+	fmt.Println(result.Error, result.RowsAffected)
 	if result.Error != nil || result.RowsAffected == 0 {
 		return errors.New("Database Can't Create Role With Provided Information")
 	}
@@ -28,7 +31,7 @@ func (r RoleRepositoryImpl) CreateRole(role *roleentity.Role) error {
 }
 
 func (r RoleRepositoryImpl) DeleteRoleById(id uint) error {
-	result := r.DB.Delete(&roleentity.Role{}, id)
+	result := r.storage.DB.Delete(&roleentity.Role{}, id)
 	if result.Error != nil || result.RowsAffected == 0 {
 		return errors.New("Database Can't Delete Role By ID")
 	}
@@ -37,7 +40,7 @@ func (r RoleRepositoryImpl) DeleteRoleById(id uint) error {
 
 func (r RoleRepositoryImpl) FindRoleById(id uint) (*roleentity.Role, error) {
 	role := new(roleentity.Role)
-	result := r.DB.First(&role, id)
+	result := r.storage.DB.First(&role, id)
 	if result.Error != nil {
 		return nil, errors.New("Database Can't Return The Role With Provided ID")
 	}
@@ -49,19 +52,19 @@ func (r RoleRepositoryImpl) FindRoleById(id uint) (*roleentity.Role, error) {
 
 func (r RoleRepositoryImpl) FindRoleByName(name string) (*roleentity.Role, error) {
 	role := new(roleentity.Role)
-	result := r.DB.Where("name = ?", name).First(&role)
+	result := r.storage.DB.Where("name = ?", name).First(&role)
 	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
 		return nil, errors.New("Database Can't Return The Role With Provided Name")
-	}
-	if role == nil {
-		return nil, errors.New("Role Not Found With This Provided Name")
 	}
 	return role, nil
 }
 
 func (r RoleRepositoryImpl) GetRoles(page, limit int) ([]roleentity.Role, error) {
 	roles := make([]roleentity.Role, 0)
-	result := r.DB.Offset(page).Limit(limit).Find(&roles)
+	result := r.storage.DB.Unscoped().Offset(page).Limit(limit).Find(&roles)
 	if result.Error != nil {
 		return nil, errors.New("Database Can't Find All Roles")
 	}

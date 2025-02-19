@@ -1,5 +1,11 @@
 package roleentity
 
+import (
+	"database/sql/driver"
+	"fmt"
+	"strings"
+)
+
 type Permission string
 
 const (
@@ -68,3 +74,30 @@ const (
 	READ_FORUM         Permission = "READ_FORUM"
 	READ_FORUM_MESSAGE Permission = "READ_FORUM_MESSAGE"
 )
+
+type Permissions []Permission
+
+func (p *Permissions) Scan(value interface{}) error {
+	switch v := value.(type) {
+	case string:
+		permissions := make(Permissions, 0)
+		for _, item := range strings.Split(v, ",") {
+			permissions = append(permissions, Permission(item))
+		}
+		*p = permissions
+		return nil
+	default:
+		return fmt.Errorf("failed to scan Permissions, invalid type %T", v)
+	}
+}
+
+func (p Permissions) Value() (driver.Value, error) {
+	if len(p) == 0 {
+		return nil, nil
+	}
+	collection := make([]string, 0)
+	for _, item := range p {
+		collection = append(collection, string(item))
+	}
+	return fmt.Sprintf("{%s}", strings.Join(collection, ",")), nil
+}

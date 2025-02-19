@@ -4,5 +4,9 @@ import roleentity "github.com/ladmakhi81/learning-management-system/internal/rol
 
 type CreateRoleReqDTO struct {
 	Name        string
-	Permissions []roleentity.Permission
+	Permissions roleentity.Permissions
+}
+
+func NewCreateRoleReqDTO() *CreateRoleReqDTO {
+	return new(CreateRoleReqDTO)
 }

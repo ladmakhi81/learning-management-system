@@ -8,9 +8,13 @@ type Role struct {
 	Name        string
 	CreatedByID *uint
 	Lock        bool
-	Permissions []Permission
+	Permissions Permissions `gorm:"type:text[]"`
 
 	gorm.Model
+}
+
+func (Role) TableName() string {
+	return "_roles"
 }
 
 func NewRole(

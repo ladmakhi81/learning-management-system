@@ -26,6 +26,8 @@ func (r UserRouter) SetupRoutes() {
 
 	userApi.POST("/", basehandler.BaseHandler(r.handler.CreateUser))
 	userApi.GET("/", basehandler.BaseHandler(r.handler.GetUsers))
+	userApi.POST("/upload-profile", basehandler.BaseHandler(r.handler.UploadProfileImage))
+	userApi.POST("/teacher/upload-resume", basehandler.BaseHandler(r.handler.UploadTeacherResume))
 	userApi.PATCH("/base-info", basehandler.BaseHandler(r.handler.UpdateBaseInformation))
 	userApi.PATCH("/change-password", basehandler.BaseHandler(r.handler.ChangePassword))
 	userApi.PATCH("/block", basehandler.BaseHandler(r.handler.BlockUser))

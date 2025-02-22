@@ -11,7 +11,8 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	ServerPort uint
+	ServerPort      uint
+	UploadDirectory string
 }
 
 type DatabaseConfig struct {
@@ -38,7 +39,8 @@ func (c *Config) setupConfig() error {
 
 func (c *Config) loadServerConfig() {
 	c.ServerConfig = &ServerConfig{
-		ServerPort: viper.GetUint("APP_PORT"),
+		ServerPort:      viper.GetUint("APP_PORT"),
+		UploadDirectory: viper.GetString("UPLOAD_DIR"),
 	}
 }
 

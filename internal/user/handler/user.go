@@ -3,6 +3,7 @@ package userhandler
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
@@ -166,4 +167,49 @@ func (h UserHandler) GetUsers(ctx *gin.Context) (*basehandler.Response, error) {
 	}
 	res := userresponsedto.NewGetUsersRes(mappedUsers, *pagination)
 	return basehandler.NewResponse(res, http.StatusOK), nil
+}
+
+func (h UserHandler) UploadTeacherResume(ctx *gin.Context) (*basehandler.Response, error) {
+	fileHeader, fileHeaderErr := ctx.FormFile("resume")
+	if fileHeaderErr != nil {
+		return nil, baseerror.NewClientErr(
+			userconstant.NOT_FOUND_RESUME_FILE,
+			http.StatusBadRequest,
+		)
+	}
+	if fileHeader.Header.Get("Content-Type") != "application/pdf" {
+		return nil, baseerror.NewClientErr(
+			userconstant.INVALID_FORMAT_RESUME,
+			http.StatusBadRequest,
+		)
+	}
+	fileName, fileErr := h.userSvc.UploadResumeFile(fileHeader)
+	if fileErr != nil {
+		return nil, fileErr
+	}
+	res := userresponsedto.NewUploadResumeResDTO(fileName)
+	return basehandler.NewResponse(res, http.StatusCreated), nil
+}
+
+func (h UserHandler) UploadProfileImage(ctx *gin.Context) (*basehandler.Response, error) {
+	fileHeader, fileHeaderErr := ctx.FormFile("image")
+	if fileHeaderErr != nil {
+		return nil, baseerror.NewClientErr(
+			userconstant.NOT_FOUND_PROFILE_IMAGE,
+			http.StatusBadRequest,
+		)
+	}
+	mediaType := fileHeader.Header.Get("Content-Type")
+	if isImage := strings.HasPrefix(mediaType, "image/"); !isImage {
+		return nil, baseerror.NewClientErr(
+			userconstant.INVALID_FORMAT_PROFILE,
+			http.StatusBadRequest,
+		)
+	}
+	filename, fileErr := h.userSvc.UploadProfileImage(fileHeader)
+	if fileErr != nil {
+		return nil, fileErr
+	}
+	res := userresponsedto.NewUploadProfileImageResDTO(filename)
+	return basehandler.NewResponse(res, http.StatusCreated), nil
 }

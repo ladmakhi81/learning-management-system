@@ -1,9 +1,20 @@
 package userservice
 
 import (
+	"fmt"
+	"image"
+	"image/jpeg"
+	"image/png"
+	"io"
+	"math/rand"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path"
+	"path/filepath"
 	"time"
 
+	baseconfig "github.com/ladmakhi81/learning-management-system/internal/base/config"
 	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
 	basetype "github.com/ladmakhi81/learning-management-system/internal/base/type"
 	baseutil "github.com/ladmakhi81/learning-management-system/internal/base/util"
@@ -11,18 +22,22 @@ import (
 	usercontractor "github.com/ladmakhi81/learning-management-system/internal/user/contractor"
 	userrequestdto "github.com/ladmakhi81/learning-management-system/internal/user/dto/request"
 	userentity "github.com/ladmakhi81/learning-management-system/internal/user/entity"
+	"github.com/nfnt/resize"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserServiceImpl struct {
 	userRepo usercontractor.UserRepository
+	config   *baseconfig.Config
 }
 
 func NewUserServiceImpl(
 	userRepo usercontractor.UserRepository,
+	config *baseconfig.Config,
 ) UserServiceImpl {
 	return UserServiceImpl{
 		userRepo: userRepo,
+		config:   config,
 	}
 }
 
@@ -252,4 +267,134 @@ func (svc UserServiceImpl) FindUserByPhone(phone string) (*userentity.User, erro
 		)
 	}
 	return user, nil
+}
+
+func (svc UserServiceImpl) UploadResumeFile(fileHeader *multipart.FileHeader) (string, error) {
+	file, fileErr := fileHeader.Open()
+	if fileErr != nil {
+		return "", baseerror.NewServerErr(
+			fileErr.Error(),
+			"UserServiceImpl.UploadResumeFile",
+		)
+	}
+	defer file.Close()
+	destination := fmt.Sprintf("%s/resumes", svc.config.UploadDirectory)
+	if err := os.MkdirAll(destination, os.ModePerm); err != nil {
+		return "", baseerror.NewServerErr(
+			err.Error(),
+			"UserServiceImpl.UploadResumeFile",
+		)
+	}
+	fileExt := filepath.Ext(fileHeader.Filename)
+	filename := fmt.Sprintf("%d%d%s",
+		time.Now().UnixMicro(),
+		rand.Intn(10000000000),
+		fileExt,
+	)
+	outputFile, outputErr := os.Create(path.Join(destination, filename))
+	if outputErr != nil {
+		return "", baseerror.NewServerErr(
+			outputErr.Error(),
+			"UserServiceImpl.UploadResumeFile",
+		)
+	}
+	defer outputFile.Close()
+	if _, err := io.Copy(outputFile, file); err != nil {
+		return "", baseerror.NewServerErr(
+			err.Error(),
+			"UserServiceImpl.UploadResumeFile",
+		)
+	}
+	return filename, nil
+}
+
+func (svc UserServiceImpl) UploadProfileImage(fileHeader *multipart.FileHeader) (string, error) {
+	file, fileErr := fileHeader.Open()
+	if fileErr != nil {
+		return "", baseerror.NewServerErr(
+			fileErr.Error(),
+			"UserServiceImpl.UploadProfileImage",
+		)
+	}
+	defer file.Close()
+	destination := fmt.Sprintf("%s/profiles", svc.config.UploadDirectory)
+	if err := os.MkdirAll(destination, os.ModePerm); err != nil {
+		return "", baseerror.NewServerErr(
+			err.Error(),
+			"UserServiceImpl.UploadProfileImage",
+		)
+	}
+	fileExt := filepath.Ext(fileHeader.Filename)
+	filename := fmt.Sprintf("%d%d%s",
+		time.Now().UnixMicro(),
+		rand.Intn(10000000000),
+		fileExt,
+	)
+	decodedImage, decodedImageErr := svc.decodeProfileImage(file, fileExt)
+	if decodedImageErr != nil {
+		return "", baseerror.NewServerErr(
+			decodedImageErr.Error(),
+			"UserServiceImpl.UploadProfileImage",
+		)
+	}
+	if decodedImage == nil {
+		return "", baseerror.NewClientErr(
+			userconstant.INVALID_FORMAT_PROFILE,
+			http.StatusBadRequest,
+		)
+	}
+	imageWidth := 200
+	imageHeight := 0
+	resizedImage := resize.Resize(uint(imageWidth), uint(imageHeight), decodedImage, resize.Lanczos2)
+	outputFile, outputErr := os.Create(path.Join(destination, filename))
+	if outputErr != nil {
+		return "", baseerror.NewServerErr(
+			outputErr.Error(),
+			"UserServiceImpl.UploadProfileImage",
+		)
+	}
+	defer outputFile.Close()
+	if encodeErr := svc.encodeProfileImage(outputFile, resizedImage, fileExt); encodeErr != nil {
+		return "", baseerror.NewServerErr(
+			encodeErr.Error(),
+			"UserServiceImpl.UploadProfileImage",
+		)
+	}
+	return filename, nil
+}
+
+func (svc UserServiceImpl) decodeProfileImage(file multipart.File, fileExt string) (image.Image, error) {
+	var decodedImage image.Image
+
+	if fileExt == ".jpg" || fileExt == ".jpeg" {
+		jpgFile, jpgErr := jpeg.Decode(file)
+		if jpgErr != nil {
+			return nil, jpgErr
+		}
+		decodedImage = jpgFile
+	}
+
+	if fileExt == ".png" {
+		pngFile, pngErr := png.Decode(file)
+		if pngErr != nil {
+			return nil, pngErr
+		}
+		decodedImage = pngFile
+	}
+
+	return decodedImage, nil
+}
+
+func (svc UserServiceImpl) encodeProfileImage(outputFile *os.File, resizedImage image.Image, fileExt string) error {
+	if fileExt == ".jpg" || fileExt == ".jpeg" {
+		if err := jpeg.Encode(outputFile, resizedImage, nil); err != nil {
+			return err
+		}
+	}
+	if fileExt == ".png" {
+		if err := png.Encode(outputFile, resizedImage); err != nil {
+			return err
+		}
+	}
+	return nil
 }

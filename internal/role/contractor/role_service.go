@@ -7,10 +7,10 @@ import (
 )
 
 type RoleService interface {
-	CreateRole(dto *rolerequestdto.CreateRoleReqDTO) (*roleentity.Role, error)
+	CreateRole(createdById uint, dto *rolerequestdto.CreateRoleReqDTO) (*roleentity.Role, error)
 	DeleteRoleById(id uint) error
 	FindRoleById(id uint) (*roleentity.Role, error)
 	FindRoleByName(name string) (*roleentity.Role, error)
 	GetRoles(page, limit int) ([]roleentity.Role, error)
-	GetRolesPaginationMetadata(currentPage uint, limit uint) (*basetype.PaginationMetadata, error)
+	GetRolesPaginationMetadata(currentPage, limit int) (*basetype.PaginationMetadata, error)
 }

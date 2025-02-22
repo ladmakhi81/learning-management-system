@@ -24,16 +24,14 @@ func NewRoleServiceImpl(
 	}
 }
 
-func (svc RoleServiceImpl) CreateRole(dto *rolerequestdto.CreateRoleReqDTO) (*roleentity.Role, error) {
+func (svc RoleServiceImpl) CreateRole(createdById uint, dto *rolerequestdto.CreateRoleReqDTO) (*roleentity.Role, error) {
 	duplicatedName, duplicatedNameErr := svc.roleRepo.FindRoleByName(dto.Name)
 	if duplicatedNameErr != nil {
 		return nil, duplicatedNameErr
 	}
 	if duplicatedName != nil {
-		return nil, baseerror.NewClientErr(roleconstant.DUPLICATE_ROLE_NAME, http.StatusConflict)
+		return nil, baseerror.NewClientErr(roleconstant.ROLE_DUPLICATE_NAME, http.StatusConflict)
 	}
-	// TODO: replace createdById with real one from token
-	createdById := uint(1)
 	role := roleentity.NewRole(
 		dto.Name,
 		&createdById,
@@ -63,7 +61,7 @@ func (svc RoleServiceImpl) FindRoleById(id uint) (*roleentity.Role, error) {
 	}
 	if role == nil {
 		return nil, baseerror.NewClientErr(
-			roleconstant.NOT_FOUND_ID,
+			roleconstant.ROLE_NOT_FOUND_ID,
 			http.StatusNotFound,
 		)
 	}
@@ -86,7 +84,7 @@ func (svc RoleServiceImpl) GetRoles(page, limit int) ([]roleentity.Role, error) 
 	return roles, nil
 }
 
-func (svc RoleServiceImpl) GetRolesPaginationMetadata(currentPage uint, limit uint) (*basetype.PaginationMetadata, error) {
+func (svc RoleServiceImpl) GetRolesPaginationMetadata(currentPage, limit int) (*basetype.PaginationMetadata, error) {
 	totalCount, totalCountErr := svc.roleRepo.GetRolesCount()
 	if totalCountErr != nil {
 		return nil, totalCountErr

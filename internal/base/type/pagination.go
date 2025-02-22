@@ -1,12 +1,24 @@
 package basetype
 
-type PaginationMetadata struct {
-	CurrentPage uint `json:"currentPage"`
-	TotalPage   uint `json:"totalPage"`
-	TotalCount  uint `json:"totalCount"`
+type PaginationParam struct {
+	Limit int
+	Page  int
 }
 
-func NewPaginationMetadata(currentPage, totalPage, totalCount uint) *PaginationMetadata {
+func NewPaginationParam(limit, page int) PaginationParam {
+	return PaginationParam{
+		Limit: limit,
+		Page:  page,
+	}
+}
+
+type PaginationMetadata struct {
+	CurrentPage int `json:"currentPage"`
+	TotalPage   int `json:"totalPage"`
+	TotalCount  int `json:"totalCount"`
+}
+
+func NewPaginationMetadata(currentPage, totalPage, totalCount int) *PaginationMetadata {
 	return &PaginationMetadata{
 		CurrentPage: currentPage,
 		TotalPage:   totalPage,

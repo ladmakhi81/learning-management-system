@@ -6,6 +6,7 @@ import (
 	baseconfig "github.com/ladmakhi81/learning-management-system/internal/base/config"
 	basestorage "github.com/ladmakhi81/learning-management-system/internal/base/storage"
 	"github.com/ladmakhi81/learning-management-system/internal/role"
+	"github.com/ladmakhi81/learning-management-system/internal/user"
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
 )
@@ -59,4 +60,7 @@ func (b Bootstrap) GetConfig() *baseconfig.Config {
 func (b Bootstrap) LoadModules() {
 	roleModule := role.NewRoleModule(b.container)
 	roleModule.LoadModule()
+
+	userModule := user.NewUserModule(b.container)
+	userModule.LoadModule()
 }

@@ -68,11 +68,11 @@ func (r RoleRepositoryImpl) GetRoles(page, limit int) ([]roleentity.Role, error)
 	return roles, nil
 }
 
-func (r RoleRepositoryImpl) GetRolesCount() (uint, error) {
+func (r RoleRepositoryImpl) GetRolesCount() (int, error) {
 	var count int64
 	result := r.storage.DB.Model(&roleentity.Role{}).Unscoped().Count(&count)
 	if result.Error != nil {
 		return 0, baseerror.NewServerErr(result.Error.Error(), "RoleRepositoryImpl.GetRolesCount")
 	}
-	return uint(count), nil
+	return int(count), nil
 }

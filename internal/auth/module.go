@@ -7,6 +7,8 @@ import (
 	authhandler "github.com/ladmakhi81/learning-management-system/internal/auth/handler"
 	authrouter "github.com/ladmakhi81/learning-management-system/internal/auth/router"
 	authservice "github.com/ladmakhi81/learning-management-system/internal/auth/service"
+	baseconfig "github.com/ladmakhi81/learning-management-system/internal/base/config"
+	usercontractor "github.com/ladmakhi81/learning-management-system/internal/user/contractor"
 	"go.uber.org/dig"
 )
 
@@ -30,8 +32,11 @@ func (m AuthModule) LoadModule() {
 func (m AuthModule) registerDependencies() {
 	m.container.Provide(authrouter.NewAuthRouter)
 	m.container.Provide(authhandler.NewAuthHandler)
-	m.container.Provide(func() authcontractor.AuthService {
-		return authservice.NewAuthServiceImpl()
+	m.container.Provide(func(userSvc usercontractor.UserService, tokenSvc authcontractor.TokenService) authcontractor.AuthService {
+		return authservice.NewAuthServiceImpl(userSvc, tokenSvc)
+	})
+	m.container.Provide(func(config *baseconfig.Config) authcontractor.TokenService {
+		return authservice.NewTokenServiceImpl(config)
 	})
 }
 

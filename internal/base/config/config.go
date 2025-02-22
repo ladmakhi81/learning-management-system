@@ -13,6 +13,7 @@ type Config struct {
 type ServerConfig struct {
 	ServerPort      uint
 	UploadDirectory string
+	SecretKey       string
 }
 
 type DatabaseConfig struct {
@@ -41,6 +42,7 @@ func (c *Config) loadServerConfig() {
 	c.ServerConfig = &ServerConfig{
 		ServerPort:      viper.GetUint("APP_PORT"),
 		UploadDirectory: viper.GetString("UPLOAD_DIR"),
+		SecretKey:       viper.GetString("SECRET_KEY"),
 	}
 }
 

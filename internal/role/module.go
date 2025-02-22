@@ -50,8 +50,8 @@ func (m RoleModule) loadRoutes() {
 	)
 
 	if err == nil {
-		fmt.Println("role module loaded successfully")
+		fmt.Println("------ Role Module Loaded ------")
 	} else {
-		fmt.Println("role module failed to load", err)
+		fmt.Println("------ Role Module Not Loaded : Failed ------")
 	}
 }

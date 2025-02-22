@@ -3,6 +3,7 @@ package basebootstrap
 import (
 	"fmt"
 
+	"github.com/ladmakhi81/learning-management-system/internal/auth"
 	baseconfig "github.com/ladmakhi81/learning-management-system/internal/base/config"
 	basestorage "github.com/ladmakhi81/learning-management-system/internal/base/storage"
 	"github.com/ladmakhi81/learning-management-system/internal/role"
@@ -63,4 +64,7 @@ func (b Bootstrap) LoadModules() {
 
 	userModule := user.NewUserModule(b.container)
 	userModule.LoadModule()
+
+	authModule := auth.NewAuthModule(b.container)
+	authModule.LoadModule()
 }

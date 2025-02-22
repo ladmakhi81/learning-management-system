@@ -22,4 +22,5 @@ type UserService interface {
 	FindUserByPhone(phone string) (*userentity.User, error)
 	UploadResumeFile(fileHeader *multipart.FileHeader) (string, error)
 	UploadProfileImage(fileHeader *multipart.FileHeader) (string, error)
+	AssignRole(executorId uint, dto userrequestdto.AssignRoleReqDTO) error
 }

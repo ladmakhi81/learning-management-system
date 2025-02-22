@@ -18,6 +18,7 @@ import (
 	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
 	basetype "github.com/ladmakhi81/learning-management-system/internal/base/type"
 	baseutil "github.com/ladmakhi81/learning-management-system/internal/base/util"
+	rolecontractor "github.com/ladmakhi81/learning-management-system/internal/role/contractor"
 	userconstant "github.com/ladmakhi81/learning-management-system/internal/user/constant"
 	usercontractor "github.com/ladmakhi81/learning-management-system/internal/user/contractor"
 	userrequestdto "github.com/ladmakhi81/learning-management-system/internal/user/dto/request"
@@ -29,15 +30,18 @@ import (
 type UserServiceImpl struct {
 	userRepo usercontractor.UserRepository
 	config   *baseconfig.Config
+	roleSvc  rolecontractor.RoleService
 }
 
 func NewUserServiceImpl(
 	userRepo usercontractor.UserRepository,
 	config *baseconfig.Config,
+	roleSvc rolecontractor.RoleService,
 ) UserServiceImpl {
 	return UserServiceImpl{
 		userRepo: userRepo,
 		config:   config,
+		roleSvc:  roleSvc,
 	}
 }
 
@@ -395,6 +399,28 @@ func (svc UserServiceImpl) encodeProfileImage(outputFile *os.File, resizedImage 
 		if err := png.Encode(outputFile, resizedImage); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (svc UserServiceImpl) AssignRole(executorId uint, dto userrequestdto.AssignRoleReqDTO) error {
+	user, userErr := svc.FindUserById(*&dto.UserID)
+	if userErr != nil {
+		return userErr
+	}
+	role, roleErr := svc.roleSvc.FindRoleById(dto.RoleID)
+	if roleErr != nil {
+		return roleErr
+	}
+	now := time.Now()
+	user.AssignedRoleByID = &executorId
+	user.AssignedRoleDate = &now
+	user.RoleID = &role.ID
+	if updateErr := svc.userRepo.EditUser(user); updateErr != nil {
+		return baseerror.NewServerErr(
+			updateErr.Error(),
+			"UserServiceImpl.AssignRole",
+		)
 	}
 	return nil
 }

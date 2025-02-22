@@ -20,6 +20,8 @@ type User struct {
 	BlockReason        string
 	LastLoginDate      *time.Time
 	RoleID             *uint
+	AssignedRoleDate   *time.Time
+	AssignedRoleByID   *uint
 
 	gorm.Model
 	Teacher

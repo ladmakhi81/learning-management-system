@@ -5,6 +5,7 @@ import (
 
 	baseconfig "github.com/ladmakhi81/learning-management-system/internal/base/config"
 	basestorage "github.com/ladmakhi81/learning-management-system/internal/base/storage"
+	rolecontractor "github.com/ladmakhi81/learning-management-system/internal/role/contractor"
 	usercontractor "github.com/ladmakhi81/learning-management-system/internal/user/contractor"
 	userhandler "github.com/ladmakhi81/learning-management-system/internal/user/handler"
 	usermapper "github.com/ladmakhi81/learning-management-system/internal/user/mapper"
@@ -38,8 +39,12 @@ func (m UserModule) registerDependencies() {
 	m.container.Provide(func(storage *basestorage.Storage) usercontractor.UserRepository {
 		return userrepository.NewUserRepositoryImpl(storage)
 	})
-	m.container.Provide(func(roleRepo usercontractor.UserRepository, config *baseconfig.Config) usercontractor.UserService {
-		return userservice.NewUserServiceImpl(roleRepo, config)
+	m.container.Provide(func(
+		roleRepo usercontractor.UserRepository,
+		config *baseconfig.Config,
+		roleSvc rolecontractor.RoleService,
+	) usercontractor.UserService {
+		return userservice.NewUserServiceImpl(roleRepo, config, roleSvc)
 	})
 }
 

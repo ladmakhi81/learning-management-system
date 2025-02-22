@@ -213,3 +213,20 @@ func (h UserHandler) UploadProfileImage(ctx *gin.Context) (*basehandler.Response
 	res := userresponsedto.NewUploadProfileImageResDTO(filename)
 	return basehandler.NewResponse(res, http.StatusCreated), nil
 }
+
+func (h UserHandler) AssignRole(ctx *gin.Context) (*basehandler.Response, error) {
+	// TODO: replace with real id from token
+	executorId := uint(1)
+	dto := userrequestdto.NewAssignRoleReqDTO()
+	if err := ctx.Bind(dto); err != nil {
+		return nil, baseerror.NewClientErr(
+			userconstant.INVALID_REQUEST_BODY,
+			http.StatusBadRequest,
+		)
+	}
+	if err := h.userSvc.AssignRole(executorId, *dto); err != nil {
+		return nil, err
+	}
+	res := userresponsedto.NewAssignRoleResDTO("Role Assigned Successfully")
+	return basehandler.NewResponse(res, http.StatusOK), nil
+}

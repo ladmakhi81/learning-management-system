@@ -5,6 +5,7 @@ import (
 
 	baseconfig "github.com/ladmakhi81/learning-management-system/internal/base/config"
 	basestorage "github.com/ladmakhi81/learning-management-system/internal/base/storage"
+	queueservice "github.com/ladmakhi81/learning-management-system/internal/queue/service"
 	rolecontractor "github.com/ladmakhi81/learning-management-system/internal/role/contractor"
 	usercontractor "github.com/ladmakhi81/learning-management-system/internal/user/contractor"
 	userhandler "github.com/ladmakhi81/learning-management-system/internal/user/handler"
@@ -43,8 +44,9 @@ func (m UserModule) registerDependencies() {
 		roleRepo usercontractor.UserRepository,
 		config *baseconfig.Config,
 		roleSvc rolecontractor.RoleService,
+		pdfQueueService *queueservice.PDFQueueService,
 	) usercontractor.UserService {
-		return userservice.NewUserServiceImpl(roleRepo, config, roleSvc)
+		return userservice.NewUserServiceImpl(roleRepo, config, roleSvc, pdfQueueService)
 	})
 }
 

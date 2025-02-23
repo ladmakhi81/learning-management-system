@@ -7,8 +7,14 @@ export DB_NAME=$(shell cat .env | grep DB_NAME | cut -d '=' -f2)
 
 build-server:
 	@go build -o ./bin/app ./cmd/api/main.go
+build-pdf-service:
+	@go build -o ./bin/pdf-processor ./cmd/pdf-compressor/main.go
+
 run-server:build-server
 	@./bin/app
+run-pdf-service:build-pdf-service
+	@./bin/pdf-processor
+
 create-migration:
 	@migrate create -ext sql -dir migrations $(name)
 run-migration:

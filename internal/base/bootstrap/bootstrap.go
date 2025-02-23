@@ -6,8 +6,10 @@ import (
 	"github.com/ladmakhi81/learning-management-system/internal/auth"
 	baseconfig "github.com/ladmakhi81/learning-management-system/internal/base/config"
 	basestorage "github.com/ladmakhi81/learning-management-system/internal/base/storage"
+	"github.com/ladmakhi81/learning-management-system/internal/queue"
 	"github.com/ladmakhi81/learning-management-system/internal/role"
 	"github.com/ladmakhi81/learning-management-system/internal/user"
+	pkgrabbitmqclient "github.com/ladmakhi81/learning-management-system/pkg/rabbitmq"
 	pkgredisclient "github.com/ladmakhi81/learning-management-system/pkg/redis-client"
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
@@ -40,6 +42,15 @@ func (b *Bootstrap) Apply() error {
 	redisClient := pkgredisclient.NewRedisClient(config)
 	redisClient.ConnectRedis()
 
+	rabbitmqClient, rabbitmqClientErr := pkgrabbitmqclient.NewRabbitmqClient(config.RabbitmqClientURL)
+	if rabbitmqClientErr != nil {
+		return fmt.Errorf("rabbitmq client not connected : %v", rabbitmqClientErr)
+	}
+
+	container.Provide(func() *pkgrabbitmqclient.RabbitmqClient {
+		return rabbitmqClient
+	})
+
 	container.Provide(func() *pkgredisclient.RedisClient {
 		return redisClient
 	})
@@ -67,6 +78,9 @@ func (b Bootstrap) GetConfig() *baseconfig.Config {
 }
 
 func (b Bootstrap) LoadModules() {
+	queueModule := queue.NewQueueModule(b.container)
+	queueModule.LoadModule()
+
 	roleModule := role.NewRoleModule(b.container)
 	roleModule.LoadModule()
 
@@ -75,4 +89,5 @@ func (b Bootstrap) LoadModules() {
 
 	authModule := auth.NewAuthModule(b.container)
 	authModule.LoadModule()
+
 }

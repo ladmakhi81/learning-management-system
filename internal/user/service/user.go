@@ -18,6 +18,8 @@ import (
 	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
 	basetype "github.com/ladmakhi81/learning-management-system/internal/base/type"
 	baseutil "github.com/ladmakhi81/learning-management-system/internal/base/util"
+	queuedto "github.com/ladmakhi81/learning-management-system/internal/queue/dto"
+	queueservice "github.com/ladmakhi81/learning-management-system/internal/queue/service"
 	rolecontractor "github.com/ladmakhi81/learning-management-system/internal/role/contractor"
 	userconstant "github.com/ladmakhi81/learning-management-system/internal/user/constant"
 	usercontractor "github.com/ladmakhi81/learning-management-system/internal/user/contractor"
@@ -28,20 +30,23 @@ import (
 )
 
 type UserServiceImpl struct {
-	userRepo usercontractor.UserRepository
-	config   *baseconfig.Config
-	roleSvc  rolecontractor.RoleService
+	userRepo        usercontractor.UserRepository
+	config          *baseconfig.Config
+	roleSvc         rolecontractor.RoleService
+	pdfQueueService *queueservice.PDFQueueService
 }
 
 func NewUserServiceImpl(
 	userRepo usercontractor.UserRepository,
 	config *baseconfig.Config,
 	roleSvc rolecontractor.RoleService,
+	pdfQueueService *queueservice.PDFQueueService,
 ) UserServiceImpl {
 	return UserServiceImpl{
-		userRepo: userRepo,
-		config:   config,
-		roleSvc:  roleSvc,
+		userRepo:        userRepo,
+		config:          config,
+		roleSvc:         roleSvc,
+		pdfQueueService: pdfQueueService,
 	}
 }
 
@@ -309,6 +314,7 @@ func (svc UserServiceImpl) UploadResumeFile(fileHeader *multipart.FileHeader) (s
 			"UserServiceImpl.UploadResumeFile",
 		)
 	}
+	svc.pdfQueueService.QueueService.Publish(queuedto.NewPDFCompressMessage(filename, destination))
 	return filename, nil
 }
 

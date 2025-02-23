@@ -9,6 +9,7 @@ type Config struct {
 	*DatabaseConfig
 	*ServerConfig
 	*RedisConfig
+	*RabbitmqConfig
 }
 
 type RedisConfig struct {
@@ -16,10 +17,15 @@ type RedisConfig struct {
 	RedisHost string
 }
 
+type RabbitmqConfig struct {
+	RabbitmqClientURL string
+}
+
 type ServerConfig struct {
 	ServerPort      uint
 	UploadDirectory string
 	SecretKey       string
+	UniPDFApiKey    string
 }
 
 type DatabaseConfig struct {
@@ -49,6 +55,7 @@ func (c *Config) loadServerConfig() {
 		ServerPort:      viper.GetUint("APP_PORT"),
 		UploadDirectory: viper.GetString("UPLOAD_DIR"),
 		SecretKey:       viper.GetString("SECRET_KEY"),
+		UniPDFApiKey:    viper.GetString("UNIPDF_API_KEY"),
 	}
 }
 
@@ -69,6 +76,12 @@ func (c *Config) loadRedisConfig() {
 	}
 }
 
+func (c *Config) loadRabbitmqConfig() {
+	c.RabbitmqConfig = &RabbitmqConfig{
+		RabbitmqClientURL: viper.GetString("RABBITMQ_CLIENT_URL"),
+	}
+}
+
 func (c *Config) LoadConfig() error {
 	if err := c.setupConfig(); err != nil {
 
@@ -78,6 +91,7 @@ func (c *Config) LoadConfig() error {
 	c.loadDatabaseConfig()
 	c.loadServerConfig()
 	c.loadRedisConfig()
+	c.loadRabbitmqConfig()
 
 	return nil
 }

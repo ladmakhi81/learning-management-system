@@ -1,6 +1,7 @@
 package authservice
 
 import (
+	"context"
 	"net/http"
 
 	authconstant "github.com/ladmakhi81/learning-management-system/internal/auth/constant"
@@ -13,21 +14,24 @@ import (
 )
 
 type AuthServiceImpl struct {
-	userSvc  usercontractor.UserService
-	tokenSvc authcontractor.TokenService
+	userSvc    usercontractor.UserService
+	tokenSvc   authcontractor.TokenService
+	sessionSvc authcontractor.SessionService
 }
 
 func NewAuthServiceImpl(
 	userSvc usercontractor.UserService,
 	tokenSvc authcontractor.TokenService,
+	sessionSvc authcontractor.SessionService,
 ) AuthServiceImpl {
 	return AuthServiceImpl{
-		userSvc:  userSvc,
-		tokenSvc: tokenSvc,
+		userSvc:    userSvc,
+		tokenSvc:   tokenSvc,
+		sessionSvc: sessionSvc,
 	}
 }
 
-func (authSvc AuthServiceImpl) Login(dto authrequestdto.LoginReqDTO) (string, error) {
+func (authSvc AuthServiceImpl) Login(ctx context.Context, dto authrequestdto.LoginReqDTO) (string, error) {
 	user, userErr := authSvc.userSvc.FindUserByPhone(dto.Phone)
 	if userErr != nil {
 		return "", userErr
@@ -49,11 +53,14 @@ func (authSvc AuthServiceImpl) Login(dto authrequestdto.LoginReqDTO) (string, er
 	if accessTokenErr != nil {
 		return "", accessTokenErr
 	}
-	// save on the redis
+	session := authrequestdto.NewSessionDTO(user.ID, accessToken)
+	if err := authSvc.sessionSvc.StoreSession(ctx, session); err != nil {
+		return "", err
+	}
 	return accessToken, nil
 }
 
-func (authSvc AuthServiceImpl) Signup(dto userrequestdto.CreateUserReqDTO) (string, error) {
+func (authSvc AuthServiceImpl) Signup(ctx context.Context, dto userrequestdto.CreateUserReqDTO) (string, error) {
 	user, userErr := authSvc.userSvc.CreateUser(dto)
 	if userErr != nil {
 		return "", userErr
@@ -63,6 +70,9 @@ func (authSvc AuthServiceImpl) Signup(dto userrequestdto.CreateUserReqDTO) (stri
 	if accessTokenErr != nil {
 		return "", accessTokenErr
 	}
-	// save on the redis
+	session := authrequestdto.NewSessionDTO(user.ID, accessToken)
+	if err := authSvc.sessionSvc.StoreSession(ctx, session); err != nil {
+		return "", err
+	}
 	return accessToken, nil
 }

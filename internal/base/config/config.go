@@ -8,6 +8,12 @@ import (
 type Config struct {
 	*DatabaseConfig
 	*ServerConfig
+	*RedisConfig
+}
+
+type RedisConfig struct {
+	RedisPort uint
+	RedisHost string
 }
 
 type ServerConfig struct {
@@ -56,6 +62,13 @@ func (c *Config) loadDatabaseConfig() {
 	}
 }
 
+func (c *Config) loadRedisConfig() {
+	c.RedisConfig = &RedisConfig{
+		RedisPort: viper.GetUint("REDIS_PORT"),
+		RedisHost: viper.GetString("RedisHost"),
+	}
+}
+
 func (c *Config) LoadConfig() error {
 	if err := c.setupConfig(); err != nil {
 
@@ -64,6 +77,7 @@ func (c *Config) LoadConfig() error {
 
 	c.loadDatabaseConfig()
 	c.loadServerConfig()
+	c.loadRedisConfig()
 
 	return nil
 }

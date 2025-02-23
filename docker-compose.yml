@@ -1,5 +1,12 @@
 version: '3.7'
 services:
+  redisdb:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - 6379:6379
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
   db:
     container_name: db
     image: postgres:latest

@@ -8,6 +8,7 @@ import (
 	basestorage "github.com/ladmakhi81/learning-management-system/internal/base/storage"
 	"github.com/ladmakhi81/learning-management-system/internal/role"
 	"github.com/ladmakhi81/learning-management-system/internal/user"
+	pkgredisclient "github.com/ladmakhi81/learning-management-system/pkg/redis-client"
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
 )
@@ -35,6 +36,13 @@ func (b *Bootstrap) Apply() error {
 	if err := storage.Connect(); err != nil {
 		return fmt.Errorf("database not connected : %v", err)
 	}
+
+	redisClient := pkgredisclient.NewRedisClient(config)
+	redisClient.ConnectRedis()
+
+	container.Provide(func() *pkgredisclient.RedisClient {
+		return redisClient
+	})
 
 	container.Provide(func() *baseconfig.Config {
 		return config

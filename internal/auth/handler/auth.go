@@ -33,7 +33,7 @@ func (h AuthHandler) Login(ctx *gin.Context) (*basehandler.Response, error) {
 			http.StatusBadRequest,
 		)
 	}
-	generatedAccessToken, authErr := h.authSvc.Login(*dto)
+	generatedAccessToken, authErr := h.authSvc.Login(ctx.Request.Context(), *dto)
 	if authErr != nil {
 		return nil, authErr
 	}
@@ -49,7 +49,7 @@ func (h AuthHandler) Signup(ctx *gin.Context) (*basehandler.Response, error) {
 			http.StatusBadRequest,
 		)
 	}
-	generatedAccessToken, authErr := h.authSvc.Signup(*dto)
+	generatedAccessToken, authErr := h.authSvc.Signup(ctx.Request.Context(), *dto)
 	if authErr != nil {
 		return nil, authErr
 	}

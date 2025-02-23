@@ -9,6 +9,9 @@ import (
 type Permission string
 
 const (
+	// super admin access to all resources
+	SUPER_ADMIN Permission = "SUPER_ADMIN"
+
 	// course
 	CREATE_COURSE           Permission = "CREATE_COURSE"
 	EDIT_COURSE             Permission = "EDIT_COURSE"

@@ -8,6 +8,7 @@ import (
 	authcontractor "github.com/ladmakhi81/learning-management-system/internal/auth/contractor"
 	authrequestdto "github.com/ladmakhi81/learning-management-system/internal/auth/dto/request"
 	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
+	securitycontractor "github.com/ladmakhi81/learning-management-system/internal/security/contractor"
 	usercontractor "github.com/ladmakhi81/learning-management-system/internal/user/contractor"
 	userrequestdto "github.com/ladmakhi81/learning-management-system/internal/user/dto/request"
 	"golang.org/x/crypto/bcrypt"
@@ -15,13 +16,13 @@ import (
 
 type AuthServiceImpl struct {
 	userSvc    usercontractor.UserService
-	tokenSvc   authcontractor.TokenService
+	tokenSvc   securitycontractor.TokenService
 	sessionSvc authcontractor.SessionService
 }
 
 func NewAuthServiceImpl(
 	userSvc usercontractor.UserService,
-	tokenSvc authcontractor.TokenService,
+	tokenSvc securitycontractor.TokenService,
 	sessionSvc authcontractor.SessionService,
 ) AuthServiceImpl {
 	return AuthServiceImpl{
@@ -48,7 +49,7 @@ func (authSvc AuthServiceImpl) Login(ctx context.Context, dto authrequestdto.Log
 			http.StatusNotFound,
 		)
 	}
-	claim := authrequestdto.NewGenerateTokenDTO(user.ID, user.RoleID)
+	claim := authrequestdto.NewTokenDTO(user.ID, user.RoleID)
 	accessToken, accessTokenErr := authSvc.tokenSvc.GenerateToken(claim)
 	if accessTokenErr != nil {
 		return "", accessTokenErr
@@ -65,7 +66,7 @@ func (authSvc AuthServiceImpl) Signup(ctx context.Context, dto userrequestdto.Cr
 	if userErr != nil {
 		return "", userErr
 	}
-	claim := authrequestdto.NewGenerateTokenDTO(user.ID, user.RoleID)
+	claim := authrequestdto.NewTokenDTO(user.ID, user.RoleID)
 	accessToken, accessTokenErr := authSvc.tokenSvc.GenerateToken(claim)
 	if accessTokenErr != nil {
 		return "", accessTokenErr

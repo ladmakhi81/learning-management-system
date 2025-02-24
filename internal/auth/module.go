@@ -7,7 +7,7 @@ import (
 	authhandler "github.com/ladmakhi81/learning-management-system/internal/auth/handler"
 	authrouter "github.com/ladmakhi81/learning-management-system/internal/auth/router"
 	authservice "github.com/ladmakhi81/learning-management-system/internal/auth/service"
-	baseconfig "github.com/ladmakhi81/learning-management-system/internal/base/config"
+	securitycontractor "github.com/ladmakhi81/learning-management-system/internal/security/contractor"
 	usercontractor "github.com/ladmakhi81/learning-management-system/internal/user/contractor"
 	pkgredisclient "github.com/ladmakhi81/learning-management-system/pkg/redis-client"
 	"go.uber.org/dig"
@@ -38,15 +38,10 @@ func (m AuthModule) registerDependencies() {
 	})
 	m.container.Provide(func(
 		userSvc usercontractor.UserService,
-		tokenSvc authcontractor.TokenService,
+		tokenSvc securitycontractor.TokenService,
 		sessionSvc authcontractor.SessionService,
 	) authcontractor.AuthService {
 		return authservice.NewAuthServiceImpl(userSvc, tokenSvc, sessionSvc)
-	})
-	m.container.Provide(func(
-		config *baseconfig.Config,
-	) authcontractor.TokenService {
-		return authservice.NewTokenServiceImpl(config)
 	})
 }
 
@@ -58,6 +53,6 @@ func (m AuthModule) loadRoutes() {
 	if err == nil {
 		fmt.Println("------ Auth Module Loaded ------")
 	} else {
-		fmt.Println("------ Auth Module Not Loaded : Failed ------")
+		fmt.Println("------ Auth Module Not Loaded : Failed ------", err)
 	}
 }

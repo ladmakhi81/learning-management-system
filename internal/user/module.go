@@ -58,6 +58,6 @@ func (m UserModule) loadRoutes() {
 	if err == nil {
 		fmt.Println("------ User Module Loaded ------")
 	} else {
-		fmt.Println("------ User Module Not Loaded : Failed ------")
+		fmt.Println("------ User Module Not Loaded : Failed ------", err)
 	}
 }

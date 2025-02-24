@@ -1,12 +1,12 @@
 package authrequestdto
 
-type GenerateTokenDTO struct {
+type TokenDTO struct {
 	UserID uint
 	RoleID *uint
 }
 
-func NewGenerateTokenDTO(userId uint, roleId *uint) GenerateTokenDTO {
-	return GenerateTokenDTO{
+func NewTokenDTO(userId uint, roleId *uint) TokenDTO {
+	return TokenDTO{
 		UserID: userId,
 		RoleID: roleId,
 	}

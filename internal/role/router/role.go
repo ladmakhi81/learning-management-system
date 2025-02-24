@@ -31,23 +31,53 @@ func (r RoleRouter) SetupRoutes() {
 
 	roleApi.Use(
 		r.middleware.CheckAccessToken,
-		r.middleware.CheckPermissions(
-			roleentity.Permissions{
-				roleentity.CREATE_ROLE,
-				roleentity.DELETE_ROLE,
-				roleentity.EDIT_ROLE,
-				roleentity.READ_ROLE,
-			},
-		),
 	)
 
-	roleApi.POST(
-		"/",
-		basehandler.BaseHandler(
-			r.handler.CreateRole,
-		),
-	)
+	// CREATE ROLE
+	roleApi.
+		Use(
+			r.middleware.CheckPermissions(
+				roleentity.Permissions{
+					roleentity.CREATE_ROLE,
+				},
+			),
+		).
+		POST(
+			"/",
+			basehandler.BaseHandler(
+				r.handler.CreateRole,
+			),
+		)
 
-	roleApi.GET("/", basehandler.BaseHandler(r.handler.GetRoles))
-	roleApi.DELETE("/:id", basehandler.BaseHandler(r.handler.DeleteRoleById))
+	// READ ROLE
+	roleApi.
+		Use(
+			r.middleware.CheckPermissions(
+				roleentity.Permissions{
+					roleentity.READ_ROLE,
+				},
+			),
+		).
+		GET(
+			"/",
+			basehandler.BaseHandler(
+				r.handler.GetRoles,
+			),
+		)
+
+	// DELETE ROLE
+	roleApi.
+		Use(
+			r.middleware.CheckPermissions(
+				roleentity.Permissions{
+					roleentity.DELETE_ROLE,
+				},
+			),
+		).
+		DELETE(
+			"/:id",
+			basehandler.BaseHandler(
+				r.handler.DeleteRoleById,
+			),
+		)
 }

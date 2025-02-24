@@ -7,9 +7,9 @@ import (
 	authhandler "github.com/ladmakhi81/learning-management-system/internal/auth/handler"
 	authrouter "github.com/ladmakhi81/learning-management-system/internal/auth/router"
 	authservice "github.com/ladmakhi81/learning-management-system/internal/auth/service"
+	rolecontractor "github.com/ladmakhi81/learning-management-system/internal/role/contractor"
 	securitycontractor "github.com/ladmakhi81/learning-management-system/internal/security/contractor"
 	usercontractor "github.com/ladmakhi81/learning-management-system/internal/user/contractor"
-	pkgredisclient "github.com/ladmakhi81/learning-management-system/pkg/redis-client"
 	"go.uber.org/dig"
 )
 
@@ -33,15 +33,13 @@ func (m AuthModule) LoadModule() {
 func (m AuthModule) registerDependencies() {
 	m.container.Provide(authrouter.NewAuthRouter)
 	m.container.Provide(authhandler.NewAuthHandler)
-	m.container.Provide(func(redisClient *pkgredisclient.RedisClient) authcontractor.SessionService {
-		return authservice.NewSessionServiceImpl(redisClient)
-	})
 	m.container.Provide(func(
 		userSvc usercontractor.UserService,
 		tokenSvc securitycontractor.TokenService,
-		sessionSvc authcontractor.SessionService,
+		sessionSvc securitycontractor.SessionService,
+		roleSvc rolecontractor.RoleService,
 	) authcontractor.AuthService {
-		return authservice.NewAuthServiceImpl(userSvc, tokenSvc, sessionSvc)
+		return authservice.NewAuthServiceImpl(userSvc, tokenSvc, sessionSvc, roleSvc)
 	})
 }
 

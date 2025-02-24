@@ -5,10 +5,12 @@ import (
 	"net/http"
 
 	authconstant "github.com/ladmakhi81/learning-management-system/internal/auth/constant"
-	authcontractor "github.com/ladmakhi81/learning-management-system/internal/auth/contractor"
 	authrequestdto "github.com/ladmakhi81/learning-management-system/internal/auth/dto/request"
 	baseerror "github.com/ladmakhi81/learning-management-system/internal/base/error"
+	rolecontractor "github.com/ladmakhi81/learning-management-system/internal/role/contractor"
+	roleentity "github.com/ladmakhi81/learning-management-system/internal/role/entity"
 	securitycontractor "github.com/ladmakhi81/learning-management-system/internal/security/contractor"
+	securitytype "github.com/ladmakhi81/learning-management-system/internal/security/type"
 	usercontractor "github.com/ladmakhi81/learning-management-system/internal/user/contractor"
 	userrequestdto "github.com/ladmakhi81/learning-management-system/internal/user/dto/request"
 	"golang.org/x/crypto/bcrypt"
@@ -17,18 +19,21 @@ import (
 type AuthServiceImpl struct {
 	userSvc    usercontractor.UserService
 	tokenSvc   securitycontractor.TokenService
-	sessionSvc authcontractor.SessionService
+	sessionSvc securitycontractor.SessionService
+	roleSvc    rolecontractor.RoleService
 }
 
 func NewAuthServiceImpl(
 	userSvc usercontractor.UserService,
 	tokenSvc securitycontractor.TokenService,
-	sessionSvc authcontractor.SessionService,
+	sessionSvc securitycontractor.SessionService,
+	roleSvc rolecontractor.RoleService,
 ) AuthServiceImpl {
 	return AuthServiceImpl{
 		userSvc:    userSvc,
 		tokenSvc:   tokenSvc,
 		sessionSvc: sessionSvc,
+		roleSvc:    roleSvc,
 	}
 }
 
@@ -49,12 +54,24 @@ func (authSvc AuthServiceImpl) Login(ctx context.Context, dto authrequestdto.Log
 			http.StatusNotFound,
 		)
 	}
+	var userRoleId *uint
+	var userPermissions roleentity.Permissions
+	if user.RoleID != nil {
+		role, roleErr := authSvc.roleSvc.FindRoleById(*user.RoleID)
+		if roleErr != nil {
+			return "", roleErr
+		}
+		userRoleId = &role.ID
+		userPermissions = role.Permissions
+	}
+
 	claim := authrequestdto.NewTokenDTO(user.ID, user.RoleID)
 	accessToken, accessTokenErr := authSvc.tokenSvc.GenerateToken(claim)
 	if accessTokenErr != nil {
 		return "", accessTokenErr
 	}
-	session := authrequestdto.NewSessionDTO(user.ID, accessToken)
+
+	session := securitytype.NewSessionDTO(user.ID, accessToken, userRoleId, userPermissions)
 	if err := authSvc.sessionSvc.StoreSession(ctx, session); err != nil {
 		return "", err
 	}
@@ -71,7 +88,7 @@ func (authSvc AuthServiceImpl) Signup(ctx context.Context, dto userrequestdto.Cr
 	if accessTokenErr != nil {
 		return "", accessTokenErr
 	}
-	session := authrequestdto.NewSessionDTO(user.ID, accessToken)
+	session := securitytype.NewSessionDTO(user.ID, accessToken, nil, nil)
 	if err := authSvc.sessionSvc.StoreSession(ctx, session); err != nil {
 		return "", err
 	}

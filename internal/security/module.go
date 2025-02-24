@@ -7,6 +7,7 @@ import (
 	securitycontractor "github.com/ladmakhi81/learning-management-system/internal/security/contractor"
 	securitymiddleware "github.com/ladmakhi81/learning-management-system/internal/security/middleware"
 	securityservice "github.com/ladmakhi81/learning-management-system/internal/security/service"
+	pkgredisclient "github.com/ladmakhi81/learning-management-system/pkg/redis-client"
 	"go.uber.org/dig"
 )
 
@@ -31,6 +32,9 @@ func (m SecurityModule) LoadModule() {
 func (m SecurityModule) registerDependencies() {
 	m.container.Provide(func(config *baseconfig.Config) securitycontractor.TokenService {
 		return securityservice.NewTokenServiceImpl(config)
+	})
+	m.container.Provide(func(redisClient *pkgredisclient.RedisClient) securitycontractor.SessionService {
+		return securityservice.NewSessionServiceImpl(redisClient)
 	})
 	m.container.Provide(securitymiddleware.NewMiddleware)
 }

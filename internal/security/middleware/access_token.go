@@ -1,6 +1,7 @@
 package securitymiddleware
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -43,6 +44,22 @@ func (m Middleware) CheckAccessToken(ctx *gin.Context) {
 		)
 		return
 	}
-	ctx.Set(securityconstant.SECURITY_DECODE_KEY, verifiedToken)
+	session, sessionErr := m.sessionSvc.GetSessionByUserId(ctx.Request.Context(), verifiedToken.UserID)
+	if sessionErr != nil {
+		fmt.Println("Session Error: ", sessionErr)
+		ctx.AbortWithStatusJSON(
+			http.StatusUnauthorized,
+			basetype.NewUnauthorizedResponse(),
+		)
+		return
+	}
+	if session == nil || session.AccessToken != token {
+		ctx.AbortWithStatusJSON(
+			http.StatusUnauthorized,
+			basetype.NewUnauthorizedResponse(),
+		)
+		return
+	}
+	ctx.Set(securityconstant.SECURITY_DECODE_KEY, session)
 	ctx.Next()
 }

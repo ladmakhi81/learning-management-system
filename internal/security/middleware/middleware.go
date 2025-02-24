@@ -5,13 +5,16 @@ import (
 )
 
 type Middleware struct {
-	tokenSvc securitycontractor.TokenService
+	tokenSvc   securitycontractor.TokenService
+	sessionSvc securitycontractor.SessionService
 }
 
 func NewMiddleware(
 	tokenSvc securitycontractor.TokenService,
+	sessionSvc securitycontractor.SessionService,
 ) Middleware {
 	return Middleware{
-		tokenSvc: tokenSvc,
+		tokenSvc:   tokenSvc,
+		sessionSvc: sessionSvc,
 	}
 }

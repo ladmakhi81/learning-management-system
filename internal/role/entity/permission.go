@@ -39,8 +39,12 @@ const (
 	VERIFY_BANNER Permission = "VERIFY_BANNER"
 
 	// user
-	VERIFY_TEACHER Permission = "VERIFY_TEACHER"
-	READ_USER      Permission = "READ_USER"
+	VERIFY_TEACHER  Permission = "VERIFY_TEACHER"
+	READ_USER       Permission = "READ_USER"
+	CREATE_USER     Permission = "CREATE_USER"
+	ASSIGN_ROLE     Permission = "ASSIGN_ROLE"
+	CHANGE_PASSWORD Permission = "CHANGE_PASSWORD"
+	BLOCK_USER      Permission = "BLOCK_USER"
 
 	// transaction
 	READ_TRANSACTION Permission = "READ_TRANSACTION"

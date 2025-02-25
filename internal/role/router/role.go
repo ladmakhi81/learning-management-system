@@ -33,7 +33,6 @@ func (r RoleRouter) SetupRoutes() {
 		r.middleware.CheckAccessToken,
 	)
 
-	// CREATE ROLE
 	roleApi.
 		Use(
 			r.middleware.CheckPermissions(

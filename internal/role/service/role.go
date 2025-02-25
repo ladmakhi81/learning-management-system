@@ -44,9 +44,15 @@ func (svc RoleServiceImpl) CreateRole(createdById uint, dto *rolerequestdto.Crea
 }
 
 func (svc RoleServiceImpl) DeleteRoleById(id uint) error {
-	role, roleErr := svc.roleRepo.FindRoleById(id)
+	role, roleErr := svc.FindRoleById(id)
 	if roleErr != nil {
 		return roleErr
+	}
+	if role.DeletedAt.Valid {
+		return baseerror.NewClientErr(
+			roleconstant.ROLE_DELETED_BEFORE,
+			http.StatusBadRequest,
+		)
 	}
 	if deleteErr := svc.roleRepo.DeleteRoleById(role.ID); deleteErr != nil {
 		return deleteErr

@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	basebootstrap "github.com/ladmakhi81/learning-management-system/internal/base/bootstrap"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -17,6 +19,10 @@ func main() {
 
 	server := gin.Default()
 	apiServer := server.Group("/api")
+
+	server.StaticFile("/swagger.yaml", "./docs/swagger.yaml")
+
+	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/swagger.yaml")))
 
 	container := bootstrap.GetContainer()
 	container.Provide(func() *gin.RouterGroup {
